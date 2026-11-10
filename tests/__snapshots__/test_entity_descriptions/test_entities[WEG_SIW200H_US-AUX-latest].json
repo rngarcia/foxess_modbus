@@ -95,6 +95,16 @@
   },
   {
     "addresses": [
+      5631
+    ],
+    "key": "battery_temp",
+    "name": "Battery Temp",
+    "scale": 0.1,
+    "signed": true,
+    "type": "sensor"
+  },
+  {
+    "addresses": [
       5246
     ],
     "key": "eps_rvolt",

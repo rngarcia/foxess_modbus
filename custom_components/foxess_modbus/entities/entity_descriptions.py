@@ -2795,6 +2795,23 @@ def _h1_us_split_phase_entities() -> Iterable[EntityFactory]:
         validate=[Range(0, 100)],
     )
 
+    # Battery temperature: NOT confirmed. 5631 is the best candidate, not a verified match. Over 24h it moved smoothly
+    # between 32.6 and 37.8 degC, lagging the ambient temperature (5244) like a battery's thermal mass would, but the
+    # cloud's "Bat Temperature" was frozen at 25.6 degC for the whole period, so there was no reference value to compare
+    # against. Disabled by default; if you have a real battery temperature reading and it disagrees, open an issue.
+    yield ModbusBatterySensorDescription(
+        key="battery_temp",
+        addresses=[ModbusAddressesSpec(input=[5631], models=Inv.H1_US)],
+        bms_connect_state_address=[],
+        entity_registry_enabled_default=False,
+        name="Battery Temp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="°C",
+        scale=0.1,
+        validate=[Range(-50, 100)],
+    )
+
 
 def _configuration_entities() -> Iterable[EntityFactory]:
     yield ModbusWorkModeSelectDescription(
