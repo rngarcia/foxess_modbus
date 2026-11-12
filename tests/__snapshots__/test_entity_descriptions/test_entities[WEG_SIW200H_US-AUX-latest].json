@@ -333,6 +333,16 @@
   },
   {
     "addresses": [
+      5635
+    ],
+    "key": "max_discharge_current",
+    "name": "Max Discharge Current",
+    "scale": null,
+    "signed": false,
+    "type": "sensor"
+  },
+  {
+    "addresses": [
       5253
     ],
     "key": "pv1_current",

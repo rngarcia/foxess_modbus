@@ -2795,6 +2795,21 @@ def _h1_us_split_phase_entities() -> Iterable[EntityFactory]:
         validate=[Range(0, 100)],
     )
 
+    # Maximum battery discharge current, in whole amps (the other models report it in 0.1 A steps). Matches the cloud's
+    # "Max Bat Discharge Current" (27 A), and 41933 in the holding registers holds the same value in 0.1 A (270).
+    # Read-only: the setting itself is not exposed.
+    yield ModbusSensorDescription(
+        key="max_discharge_current",
+        addresses=[ModbusAddressesSpec(input=[5635], models=Inv.H1_US)],
+        entity_registry_enabled_default=False,
+        name="Max Discharge Current",
+        device_class=SensorDeviceClass.CURRENT,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="A",
+        signed=False,
+        validate=[Range(0, 100)],
+    )
+
 
 def _configuration_entities() -> Iterable[EntityFactory]:
     yield ModbusWorkModeSelectDescription(
