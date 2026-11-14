@@ -2786,7 +2786,6 @@ def _h1_us_split_phase_entities() -> Iterable[EntityFactory]:
         key="battery_soh",
         addresses=[ModbusAddressesSpec(input=[5633], models=Inv.H1_US)],
         bms_connect_state_address=[],
-        entity_registry_enabled_default=False,
         name="Battery SoH",
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
@@ -2809,6 +2808,40 @@ def _h1_us_split_phase_entities() -> Iterable[EntityFactory]:
         signed=False,
         validate=[Range(0, 100)],
     )
+
+    # Battery temperature: NOT confirmed. 5631 sits next to the SoC (5632) and moves like a battery's thermal mass (over
+    # 24h it lagged the room temperature by 1-1.5h with roughly half the swing), but the cloud's "Bat Temperature" is
+    # frozen at 25.6 degC (it shows holding 41890, a status code), so there was no reference to compare against.
+    # It reads about 10 degC above the BMS's own cell temperatures (holding 41901/41902, ~27-30 degC at the same time),
+    # and it mirrors holding 41905 exactly, so it may be a different sensor in the pack (e.g. near the BMS board).
+    # If you have a real battery temperature reading and it disagrees, please open an issue.
+    yield ModbusBatterySensorDescription(
+        key="battery_temp",
+        addresses=[ModbusAddressesSpec(input=[5631], models=Inv.H1_US)],
+        bms_connect_state_address=[],
+        name="Battery Temp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="°C",
+        scale=0.1,
+        validate=[Range(-50, 100)],
+    )
+
+    # Registers next to the battery block whose meaning is not known. They are exposed raw (no unit or scale), disabled
+    # by default, in case they help someone reverse-engineer the map. What was observed is noted for each.
+    #  - 5630 / 5639: 0 except while the inverter tops the battery up from the grid (the periodic maintenance cycle
+    #    that starts when the SoC has dropped to ~97%), where they read 149 / 146 at 2.98 kW (battery current -14.7 A).
+    #    They are not the "max charge current" shown by the cloud (2-6 A while idle).
+    #  - 5634: same cycle, reads 14 (0 otherwise); looks like the whole-amp version of the current above
+    for address in (5630, 5634, 5639):
+        yield ModbusSensorDescription(
+            key=f"unknown_input_{address}",
+            addresses=[ModbusAddressesSpec(input=[address], models=Inv.H1_US)],
+            entity_registry_enabled_default=False,
+            name=f"Unknown Input {address}",
+            state_class=SensorStateClass.MEASUREMENT,
+            signed=False,
+        )
 
 
 def _configuration_entities() -> Iterable[EntityFactory]:

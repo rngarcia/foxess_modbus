@@ -29,7 +29,9 @@ H1_INVERTER_STATES = [
 ]
 
 # H1-US (e.g. WEG SIW200H S114 W20). Input register 5220 is a bitfield rather than an index; only the two values
-# below have been observed so far (normal operation, and a grid outage until the inverter re-synchronises).
+# below have a known meaning (normal operation, and a grid outage until the inverter re-synchronises).
+# 0x1400 (5120) has also been seen once, for 15 seconds at 01:00 with the battery full and no load change; what it
+# means is not known, so it is reported as Unknown.
 H1_US_INVERTER_STATES = {
     0x0800: "On Grid",
     0x9100: "Off Grid / EPS",
@@ -37,6 +39,9 @@ H1_US_INVERTER_STATES = {
 
 # H1-US input register 6000: follows the presence of grid voltage, changing as soon as the grid drops or returns
 # (whereas the inverter state above only goes back to On Grid after the reconnection delay).
+# The value 1 has only been seen during the periodic battery maintenance cycle: when the SoC has dropped to ~97% the
+# inverter recharges the battery from the grid at ~3 kW for 8-10 minutes, and the register reads 1 for that time while
+# the grid is present and the inverter state stays On Grid. Its meaning is not known.
 H1_US_GRID_STATES = [
     "Grid Present",
     "Unknown",
