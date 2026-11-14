@@ -2809,12 +2809,14 @@ def _h1_us_split_phase_entities() -> Iterable[EntityFactory]:
         validate=[Range(0, 100)],
     )
 
-    # Battery temperature: NOT confirmed. 5631 sits next to the SoC (5632) and moves like a battery's thermal mass (over
-    # 24h it lagged the room temperature by 1-1.5h with roughly half the swing), but the cloud's "Bat Temperature" is
-    # frozen at 25.6 degC (it shows holding 41890, a status code), so there was no reference to compare against.
-    # It reads about 10 degC above the BMS's own cell temperatures (holding 41901/41902, ~27-30 degC at the same time),
-    # and it mirrors holding 41905 exactly, so it may be a different sensor in the pack (e.g. near the BMS board).
-    # If you have a real battery temperature reading and it disagrees, please open an issue.
+    # Battery temperature. 5631 sits next to the SoC (5632) and SoH (5633), and the inverter copies it from the BMS
+    # block of the holding registers: it is identical to 41905 (as 5633 is to 41930), whereas the BMS's cell
+    # temperatures high/low are 41901/41902. That is the same split as the H3 (a battery temp plus separate BMS cell
+    # temp high/low), so this is most likely the battery temperature the inverter itself reports. It is not verified
+    # against a reference: the cloud's "Bat Temperature" is frozen at 25.6 degC (it shows holding 41890, a status code).
+    # Over 24h it moved like a thermal mass (lagging the room temperature by 1-1.5h with about half the swing), but it
+    # reads about 10 degC above the cell temperatures. If you have a real reading and it disagrees, please open an
+    # issue.
     yield ModbusBatterySensorDescription(
         key="battery_temp",
         addresses=[ModbusAddressesSpec(input=[5631], models=Inv.H1_US)],
